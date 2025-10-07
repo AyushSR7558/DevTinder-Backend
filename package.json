@@ -1,0 +1,28 @@
+{
+  "name": "devtinder",
+  "version": "1.0.0",
+  "description": "This is the platform for the developers to connect with each other ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "AyushSR7558"
+  },
+  "keywords": [
+    "ExpressJS",
+    "NodeJS",
+    "dotenv",
+    "React",
+    "JS",
+    "HTML",
+    "CSS"
+  ],
+  "author": "Ayush Raut",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0"
+  }
+}
