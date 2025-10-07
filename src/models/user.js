@@ -1,0 +1,99 @@
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+
+const cartSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  type: {
+    type: String,
+    enum: ["Domestic", "Agriculture", "Homeuse"],
+    immutable: true,
+  },
+});
+
+const userSchema = new mongoose.Schema(
+  {
+    // We will define the structure of the document in this part
+    firstName: {
+      type: String,
+      immutable: true,
+      required: true,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      immutable: true,
+      required: true,
+      trim: true,
+    },
+    age: {
+      type: Number,
+    },
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other"],
+    },
+    emailId: {
+      type: String,
+      select: false,
+      trim: true,
+      lowercase: true,
+      immutable: true,
+      required: true,
+      match: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    },
+    mobileNumber: {
+      type: String,
+      select: false,
+      required: true,
+    },
+    password: {
+      type: String,
+      select: false,
+      required: true,
+    },
+    cart: {
+      type: [cartSchema],
+      default: undefined,
+    },
+  },
+  {
+    timestamps: true,
+    virtuals: {
+      fullName: {
+        get() {
+          return this.name.firstName + " " + this.name.lastName;
+        },
+        set(s) {
+          this.name.firstName = s.substr(0, s.indexOf(" "));
+          this.name.lastName = s.substr(s.indexOf(" ") + 1);
+        },
+      },
+    },
+    methods: {
+      sayName() {
+        return this.name.firstName + " " + this.name.lastName;
+      },
+      getJWT : async function() {
+        const user = this;
+
+        const token = await jwt.sign({ _id: user._id }, "DevTinder@790", {
+          expiresIn: "1h",
+        });
+
+        return token;
+      },
+    },
+    statics: {
+      sayHello() {
+        return "Hello";
+      },
+    },
+  }
+);
+const Assignment = mongoose.model("Assignment", { dueDate: Date });
+
+const User = mongoose.model("User", userSchema);
+module.exports = { User, Assignment };
