@@ -2,7 +2,9 @@ const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/database");
 const authRouter = require("./routes/auth");
-const cookieParser = require("cookie-parser")
+const profileRouter = require("./routes/profile");
+const cookieParser = require("cookie-parser");
+
 
 dotenv.config();
 
@@ -11,13 +13,16 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cookieParser());
 app.use(express.json());
-// app.use("/", (req, res) => console.log(req.cookies));
+app.use("/", (req, res, next) => {
+  next();
+});
 
+app.use("/profile", profileRouter);
 app.use("/", authRouter);
 
 connectDB()
   .then(() => {
-    app.listen(PORT , () => {
+    app.listen(PORT, () => {
       console.log(`Listening at the PORT ${PORT}`);
     });
   })

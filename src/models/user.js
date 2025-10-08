@@ -18,13 +18,11 @@ const userSchema = new mongoose.Schema(
     // We will define the structure of the document in this part
     firstName: {
       type: String,
-      immutable: true,
       required: true,
       trim: true,
     },
     lastName: {
       type: String,
-      immutable: true,
       required: true,
       trim: true,
     },
@@ -46,7 +44,6 @@ const userSchema = new mongoose.Schema(
     },
     mobileNumber: {
       type: String,
-      select: false,
       required: true,
     },
     password: {
@@ -58,6 +55,18 @@ const userSchema = new mongoose.Schema(
       type: [cartSchema],
       default: undefined,
     },
+    about: {
+      type: String,
+      default: "This is the default about section"
+    },
+    skills: {
+      type: [String],
+      default: undefined
+    },
+    isMarried: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     timestamps: true,

@@ -38,7 +38,6 @@ authRouter.post("/signup", async (req, res) => {
     res.status(404).send(err.message);
   }
 });
-
 authRouter.post("/login", async (req, res) => {
   const { emailId, password } = req.body;
   try {
@@ -66,22 +65,13 @@ authRouter.post("/login", async (req, res) => {
     res.status(401).send(err.message);
   }
 });
-authRouter.get("/profile", async (req, res) => {
-  const cookie = req.cookies;
-  try {
-    const { token } = cookie;
-    // if (!token) {
-    //   throw new Error("Please Login first!");
-    // }
-    const { _id } = jwt.verify(token, process.env.key);
-    const user = await User.findById(_id);
-    // if (!user) {
-    //   throw new Error("The Given user is not in the DB");
-    // }
-    res.send(user);
-  } catch (err) {
-    res.status(401).send(err.message);
-  }
-});
+authRouter.post("/logout", async (req, res) => {
+  console.log("Logout is in process")
+  res.
+    cookie("token", null, {
+      expires: new Date(Date.now())
+    })
+    .send("Logout Sucessfully!!!")
+})
 
 module.exports = authRouter;
