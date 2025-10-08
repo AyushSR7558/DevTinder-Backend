@@ -1,12 +1,21 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-const {User} = require("../models/user");
+const { User } = require("../models/user");
+const jwt = require("jsonwebtoken");
 
 const authRouter = express.Router();
 
 authRouter.post("/signup", async (req, res) => {
   try {
-    const { firstName, lastName, age, gender, emailId, password, mobileNumber } = req.body;
+    const {
+      firstName,
+      lastName,
+      age,
+      gender,
+      emailId,
+      password,
+      mobileNumber,
+    } = req.body;
 
     const otherUserWithSameEmail = await User.findOne({ emailId: emailId });
     if (otherUserWithSameEmail) {
@@ -20,7 +29,7 @@ authRouter.post("/signup", async (req, res) => {
       gender,
       emailId,
       password: hashPassword,
-      mobileNumber
+      mobileNumber,
     });
 
     await user.save();
@@ -29,4 +38,50 @@ authRouter.post("/signup", async (req, res) => {
     res.status(404).send(err.message);
   }
 });
+
+authRouter.post("/login", async (req, res) => {
+  const { emailId, password } = req.body;
+  try {
+    if (!emailId || !password) {
+      throw new Error("Please send proper email and password");
+    }
+    // We will have to find the user with this emailId
+    const user = await User.findOne({ emailId }).select("+password");
+    if (!user) {
+      throw new Error("User with this email Id is not present in the DB");
+    }
+    const passwordHash = user.password;
+    const isValid = await bcrypt.compare(password, passwordHash);
+    if (isValid) {
+      const cookie = await user.getJWT();
+      res
+        .cookie("token", cookie, {
+          expires: new Date(Date.now() + 36000000),
+        })
+        .send(user);
+    } else {
+      throw new Error("invalid Credentials");
+    }
+  } catch (err) {
+    res.status(401).send(err.message);
+  }
+});
+authRouter.get("/profile", async (req, res) => {
+  const cookie = req.cookies;
+  try {
+    const { token } = cookie;
+    // if (!token) {
+    //   throw new Error("Please Login first!");
+    // }
+    const { _id } = jwt.verify(token, process.env.key);
+    const user = await User.findById(_id);
+    // if (!user) {
+    //   throw new Error("The Given user is not in the DB");
+    // }
+    res.send(user);
+  } catch (err) {
+    res.status(401).send(err.message);
+  }
+});
+
 module.exports = authRouter;
