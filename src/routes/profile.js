@@ -1,7 +1,8 @@
 const express = require("express");
 const userAuth = require("../midwares/userAuth");
 const { User } = require("../models/user");
-const validateProfileEditData = require("../utils/validateProfileEditData");
+const {validateProfileEditData, validatePasswordForgotData} = require("../utils/validateProfileEditData");
+const bcrypt = require("bcrypt");
 
 const profileRouter = express.Router();
 
@@ -29,5 +30,21 @@ profileRouter.put("/edit", userAuth, async (req, res) => {
     res.status(401).send(err.message);
   }
 });
+profileRouter.put("/password", userAuth, async(req, res) => {
+  try{
+    await validatePasswordForgotData(req);
+    const {newPassword} = req.body;
+    if(!newPassword) {
+      throw new Error("Enter the new Password");
+    }
+    const loggedInUser = req.user;
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    loggedInUser.password = newPasswordHash;
+    await loggedInUser.save();
+    res.send("Password has been changed sucessfully");
+  }catch(err) {
+    res.status(401).send(err.message);
+  }
+})
 
 module.exports = profileRouter;

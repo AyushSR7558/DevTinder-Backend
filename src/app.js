@@ -4,6 +4,7 @@ const connectDB = require("./config/database");
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const cookieParser = require("cookie-parser");
+const requestRouter = require("./routes/request");
 
 
 dotenv.config();
@@ -13,10 +14,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cookieParser());
 app.use(express.json());
-app.use("/", (req, res, next) => {
-  next();
-});
 
+app.use("/request", requestRouter);
 app.use("/profile", profileRouter);
 app.use("/", authRouter);
 

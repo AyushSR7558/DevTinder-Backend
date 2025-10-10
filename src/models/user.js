@@ -1,18 +1,6 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 
-const cartSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  type: {
-    type: String,
-    enum: ["Domestic", "Agriculture", "Homeuse"],
-    immutable: true,
-  },
-});
-
 const userSchema = new mongoose.Schema(
   {
     // We will define the structure of the document in this part
@@ -50,10 +38,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       select: false,
       required: true,
-    },
-    cart: {
-      type: [cartSchema],
-      default: undefined,
     },
     about: {
       type: String,
@@ -102,7 +86,5 @@ const userSchema = new mongoose.Schema(
     },
   }
 );
-const Assignment = mongoose.model("Assignment", { dueDate: Date });
-
 const User = mongoose.model("User", userSchema);
-module.exports = { User, Assignment };
+module.exports = { User };

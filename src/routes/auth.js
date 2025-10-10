@@ -33,9 +33,12 @@ authRouter.post("/signup", async (req, res) => {
     });
 
     await user.save();
-    res.send("User is added Sucessfullly");
+    res.json({
+      message: "User added sucessfully",
+      data: user
+    });
   } catch (err) {
-    res.status(404).send(err.message);
+    res.status(404).json({message: err.message});
   }
 });
 authRouter.post("/login", async (req, res) => {
@@ -66,7 +69,6 @@ authRouter.post("/login", async (req, res) => {
   }
 });
 authRouter.post("/logout", async (req, res) => {
-  console.log("Logout is in process")
   res.
     cookie("token", null, {
       expires: new Date(Date.now())

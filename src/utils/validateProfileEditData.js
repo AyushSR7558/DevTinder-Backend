@@ -1,17 +1,18 @@
 const validator = require("validator");
+const { User } = require("../models/user");
+const bcrypt = require("bcrypt");
 
 // Define field-specific validation rules
 const functionsForValidation = {
   firstName: (value) => validator.isAlpha(value, "en-US", { ignore: " " }),
   lastName: (value) => validator.isAlpha(value, "en-US", { ignore: " " }),
   age: (value) => validator.isInt(value.toString(), { min: 0, max: 120 }),
-  gender: (value) =>
-    ["male", "female", "other"].includes(value.toLowerCase()),
+  gender: (value) => ["male", "female", "other"].includes(value.toLowerCase()),
   mobileNumber: (value) =>
     validator.isMobilePhone(value, "any", { strictMode: false }),
   about: (value) => typeof value === "string" && value.length <= 300,
   skills: (value) => Array.isArray(value) && value.length <= 20,
-  isMarried: (value) => new Boolean(value)
+  isMarried: (value) => new Boolean(value),
 };
 
 /**
@@ -38,10 +39,25 @@ const validateProfileEditData = (req) => {
         throw new Error(`Invalid value for field: '${field}'.`);
       }
     });
-
   } catch (err) {
     throw new Error(err.message);
   }
 };
 
-module.exports = validateProfileEditData;
+const validatePasswordForgotData = async (req, res) => {
+  // Get the password
+
+  const { currPassword } = req.body;
+  if (!currPassword) {
+    throw new Error("Enter the Current Password");
+  }
+  const { password: currPasswordHash } = await User.findById(
+    req.user._id
+  ).select("+password");
+  const isValid = await bcrypt.compare(currPassword, currPasswordHash);
+  if (!isValid) {
+    throw new Error("Enter the correct password");
+  }
+};
+
+module.exports = { validateProfileEditData, validatePasswordForgotData };
