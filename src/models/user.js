@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       select: false,
       trim: true,
+      unique: true,
       lowercase: true,
       immutable: true,
       required: true,
