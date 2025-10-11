@@ -4,21 +4,15 @@ const userAuth = require("../midwares/userAuth");
 
 const userRouter = express.Router();
 
-userRouter.use("/requests", userAuth, (req, res) => {
-  try {
-    const loggedInUser = req.user;
+userRouter.get("/request/recieved",userAuth,async (req, res) => {
+  const loggedInUser = req.user;
 
-    const requests = ConnectionRequest.find({
-      toUserId: loggedInUser._id,
-      status: "interested",
-    });
-
-    res.json({ message: "Data fetch is successful", data });
-  } catch (err) {
-    res.status(400).json({
-      message: err.message,
-    });
-  }
-});
+  const requests = await ConnectionRequest.find({
+    toUserId: loggedInUser._id,
+    status: "interested"
+  });
+  
+  res.json({message: "Data has fetched sucessfully", data: requests})
+})
 
 module.exports = userRouter;
