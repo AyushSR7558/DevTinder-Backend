@@ -6,13 +6,19 @@ const profileRouter = require("./routes/profile");
 const cookieParser = require("cookie-parser");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
-
+const cors = require("cors");
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(
+  cors({
+    origin: "http://localhost:5176",
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 app.use(express.json());
 
@@ -23,10 +29,9 @@ app.use("/", authRouter);
 
 connectDB()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Listening at the PORT ${PORT}`);
-    });
+    console.log("✅ MongoDB Connected");
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((err) => {
-    console.log(err);
+    console.error("❌ Database connection failed:", err.message);
   });

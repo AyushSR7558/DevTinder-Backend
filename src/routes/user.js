@@ -1,6 +1,8 @@
 const express = require("express");
 const ConnectionRequest = require("../models/connectionRequest");
 const userAuth = require("../midwares/userAuth");
+const { User } = require("../models/user");
+const mongoose = require("mongoose");
 
 const userRouter = express.Router();
 
@@ -48,5 +50,43 @@ userRouter.get("/connections", userAuth, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+userRouter.get("/feed", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+
+    const connectionRequests = await ConnectionRequest.find({
+      $or: [
+        { fromUserId: loggedInUser._id },
+        { toUserId: loggedInUser._id },
+      ],
+    });
+
+    const hideUserFromFeed = new Set();
+
+    connectionRequests.forEach((r) => {
+      hideUserFromFeed.add(r.fromUserId.toString());
+      hideUserFromFeed.add(r.toUserId.toString());
+    });
+
+    const users = await User.aggregate([
+      {
+        $match: {
+          _id: {
+            $nin: Array.from(hideUserFromFeed).map(
+              (id) => new mongoose.Types.ObjectId(id)
+            ),
+            $ne: loggedInUser._id,
+          },
+        },
+      },
+      { $sample: { size: 10 } }, // random feed of 10 users
+    ]);
+
+    res.json(users);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
 
 module.exports = userRouter;
